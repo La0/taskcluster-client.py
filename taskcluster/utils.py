@@ -334,7 +334,6 @@ def authenticate(description=None):
   if 'clientId' in existingCred and 'accessToken' in existingCred:
     return existingCred
 
-
   # Importing here to avoid loading these 'obscure' module before it's needed.
   # Most clients won't use this feature, so we don't want issues with these
   # modules to affect the library. Maybe they don't work in some environments
