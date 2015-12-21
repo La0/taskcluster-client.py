@@ -11,6 +11,8 @@ import sys
 
 MAX_RETRIES = 5
 
+CONFIG_FILE = os.path.expanduser('~/.config/taskcluster.json')
+
 log = logging.getLogger(__name__)
 
 try:
@@ -268,6 +270,45 @@ def isExpired(certificate):
   return expiry < int(time.time() * 1000 + 20 * 60 * 1000)
 
 
+def readCfgFile():
+  try:
+    with open(CONFIG_FILE) as cfgfile:
+      return json.load(cfgfile)['credentials']
+  except:
+    log.warn('Unable to read credentials file' + CONFIG_FILE)
+    raise
+
+
+def writeCfgFile(credentials):
+  data = {}
+  try:
+    try:
+      os.makedirs(os.path.dirname(CONFIG_FILE))
+    except:
+      pass
+    if os.path.exists(CONFIG_FILE):
+      with open(CONFIG_FILE) as cfgfile:
+        data = json.load(cfgfile)
+    data['credentials'] = credentials
+    with open(CONFIG_FILE, 'w') as cfgfile:
+      json.dump(data, cfgfile, indent=2)
+  except:
+    log.warn('Unable to write to config file ' + CONFIG_FILE)
+    raise
+
+
+def readCredentialsFromEnv():
+  c = {}
+  if 'TASKCLUSTER_CLIENT_ID' in os.environ and 'TASKCLUSTER_ACCESS_TOKEN' in os.environ:
+    c['clientId'] = os.environ['TASKCLUSTER_CLIENT_ID']
+    c['accessToken'] = os.environ['TASKCLUSTER_ACCESS_TOKEN']
+    if 'TASKCLUSTER_CERTIFICATE' in os.environ:
+        c['certificate'] = os.environ['TASKCLUSTER_CERTIFICATE']
+    return c
+  else:
+    return {}
+
+
 def authenticate(description=None):
   """
     Open a web-browser to login.taskcluster.net and listen on localhost for
@@ -276,6 +317,24 @@ def authenticate(description=None):
     The description will be shown on login.taskcluster.net, if not provided
     a default message with script path will be displayed.
   """
+
+  # Let's first offer to read credentials from a configuration file then
+  # the environment
+  existingCred = {}
+  try:
+    existingCred.update(readCfgFile())
+  except:
+    log.warn('Exception thrown while trying to read credentials from file')
+
+  try:
+    existingCred.update(readCredentialsFromEnv())
+  except:
+    log.warn('Exception thrown while trying to read credentials from environment')
+
+  if 'clientId' in existingCred and 'accessToken' in existingCred:
+    return existingCred
+
+
   # Importing here to avoid loading these 'obscure' module before it's needed.
   # Most clients won't use this feature, so we don't want issues with these
   # modules to affect the library. Maybe they don't work in some environments
@@ -353,4 +412,14 @@ def authenticate(description=None):
 
   while not creds[0]:
     server.handle_request()
+
+  if sys.stdout.isatty():
+      print "Retreived credentials successfully.\n\nType 'yes' to save to " + CONFIG_FILE
+      a = raw_input().strip().lower()
+      if a == 'yes':
+        print "Saving configuration file"
+        writeCfgFile(creds[0])
+      else:
+        print "Not saving configuration file"
+
   return creds[0]
