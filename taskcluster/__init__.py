@@ -1,5 +1,5 @@
 """ Python client for Taskcluster """
-
+# from __future__ import absolute_import
 import logging
 import os
 import client

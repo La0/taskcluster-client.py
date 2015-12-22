@@ -1,6 +1,5 @@
 """This module is used to interact with taskcluster rest apis"""
-
-import os
+from __future__ import absolute_import
 import json
 import logging
 import copy
@@ -29,11 +28,6 @@ API_CONFIG = json.loads(resource_string(__name__, 'apis.json').decode('utf-8'))
 
 # Default configuration
 _defaultConfig = config = {
-  'credentials': {
-    'clientId': os.environ.get('TASKCLUSTER_CLIENT_ID'),
-    'accessToken': os.environ.get('TASKCLUSTER_ACCESS_TOKEN'),
-    'certificate': os.environ.get('TASKCLUSTER_CERTIFICATE'),
-  },
   'maxRetries': 5,
   'signedUrlExpiration': 15 * 60,
 }
@@ -62,7 +56,19 @@ class BaseClient(object):
           except:
             s = '%s (%s) must be unicode encodable' % (x, credentials[x])
             raise exceptions.TaskclusterAuthFailure(s)
+
+    if 'credentials' not in o:
+      envCred = utils.readCredentialsFromEnv()
+      if envCred and not utils.credentialIsExpired(envCred):
+        o['credentials'] = envCred
+
+    if 'credentials' not in o:
+      fileCred = utils.readCredentialsFromFile()
+      if fileCred and not utils.credentialIsExpired(fileCred):
+        o['credentials'] = fileCred
+
     self.options = o
+
     if 'credentials' in o:
       log.debug('credentials key scrubbed from logging output')
     log.debug(dict((k, v) for k, v in o.items() if k != 'credentials'))
