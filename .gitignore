@@ -1,10 +1,7 @@
 # whitelist non-codegen taskcluster files
-taskcluster/*
-!taskcluster/__init__.py
-!taskcluster/apis.json
-!taskcluster/client.py
-!taskcluster/exceptions.py
-!taskcluster/utils.py
+taskcluster/generated/*
+!taskcluster/generated/__init__.py
+!taskcluster/generated/__init__.orig
 
 # This project's things
 docs/client.rst

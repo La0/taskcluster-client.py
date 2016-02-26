@@ -12,16 +12,16 @@ APIS_JSON=$(PWD)/taskcluster/apis.json
 APIS_JS_HREF=https://raw.githubusercontent.com/taskcluster/taskcluster-client/$(JS_CLIENT_BRANCH)/lib/apis.js
 
 .PHONY: update
-update: update-api codegen update-readme docs
+update: update-api gencode update-readme docs
 
 .PHONY: update-api
 update-api: $(VENV)/bin/python
 	API_REF_OUT="$(APIS_JSON)" $(VENV)/bin/python fetchApi.py
 	@python -mjson.tool $(APIS_JSON) > /dev/null || echo "apis.json cannot be parsed by python's JSON"
 
-.PHONY: codegen
-codegen: $(VENV)/bin/python
-	API_REF="$(APIS_JSON)" $(VENV)/bin/python codeGen.py
+.PHONY: gencode
+gencode: $(VENV)/bin/python
+	APIS_JSON="$(APIS_JSON)" $(VENV)/bin/python genCode.py
 
 .PHONY: update-readme
 update-readme: $(VENV)/bin/python

@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # nuke + create tc/
     # touch tc/__init__.py
     json_file = os.environ.get(
-        "API_REF",
+        "APIS_JSON",
         os.path.join(os.path.dirname(__file__), "taskcluster", "apis.json")
     )
     api_def = load_json(json_file)
