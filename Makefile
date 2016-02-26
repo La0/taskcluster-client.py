@@ -12,12 +12,16 @@ APIS_JSON=$(PWD)/taskcluster/apis.json
 APIS_JS_HREF=https://raw.githubusercontent.com/taskcluster/taskcluster-client/$(JS_CLIENT_BRANCH)/lib/apis.js
 
 .PHONY: update
-update: update-api update-readme docs
+update: update-api codegen update-readme docs
 
 .PHONY: update-api
 update-api: $(VENV)/bin/python
 	API_REF_OUT="$(APIS_JSON)" $(VENV)/bin/python fetchApi.py
 	@python -mjson.tool $(APIS_JSON) > /dev/null || echo "apis.json cannot be parsed by python's JSON"
+
+.PHONY: codegen
+codegen: $(VENV)/bin/python
+	API_REF="$(APIS_JSON)" $(VENV)/bin/python codeGen.py
 
 .PHONY: update-readme
 update-readme: $(VENV)/bin/python
@@ -37,6 +41,7 @@ clean:
 	rm -rf node-$(NODE_VER)-$(NODE_PLAT) node_modules
 	rm -rf *.egg *.egg-info dist/
 	find . -name "*.py?" -exec rm {} +
+	rm `find taskcluster -name \*.py -exec grep -l '# Generated code' +`
 	rm -rf .tox htmlcov .coverage
 	rm -rf env-*
 
