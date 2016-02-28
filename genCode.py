@@ -16,19 +16,6 @@ def load_json(filename):
         return json.load(fh)
 
 
-def argumentstring(entry):
-    '''
-    Returns an argument string for the given function
-    '''
-    argument_names = ['self']
-    if 'args' in entry:
-        argument_names.extend(entry['args'])
-    if 'input' in entry:
-        input_name = 'payload'
-        argument_names.append(input_name)
-    return ", ".join(argument_names)
-
-
 def angles_to_braces(s):
     '''
     Returns a string with <vars> replaced by {vars}
@@ -48,7 +35,6 @@ def render(env, template_name, service_name, defn):
     return template.render(
         service_name=service_name,
         api=api,
-        argumentstring=argumentstring,
         reference_url = url,
     )
 
@@ -89,7 +75,7 @@ if __name__ == '__main__':
         env = Environment(loader=FileSystemLoader('templates'))
         env.filters['string'] = stringify
         env.filters['docstring'] = docstringify
-        env.filters['angles_to_braces'] = angles_to_braces
+#        env.filters['angles_to_braces'] = angles_to_braces
         code = render(env, 'genCode.template', name, defn)
         with open(os.path.join(os.getcwd(), 'taskcluster', 'generated', '{}.py'.format(name)),
                   'w') as fh:
