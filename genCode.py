@@ -90,7 +90,7 @@ if __name__ == '__main__':
         env.filters['string'] = stringify
         env.filters['docstring'] = docstringify
         env.filters['angles_to_braces'] = angles_to_braces
-        code = render(env, 'baseUrl.template', name, defn)
+        code = render(env, 'genCode.template', name, defn)
         with open(os.path.join(os.getcwd(), 'taskcluster', 'generated', '{}.py'.format(name)),
                   'w') as fh:
             code = to_unicode(code)
