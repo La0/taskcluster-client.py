@@ -62,7 +62,7 @@ def docstringify(s, level=4):
 
 
 def to_unicode(obj):
-    if not isinstance(obj, six.binary_type):
+    if not isinstance(obj, six.string_types):
         try:
             obj = obj.encode('utf-8')
         except TypeError:
@@ -71,8 +71,7 @@ def to_unicode(obj):
 
 
 if __name__ == '__main__':
-    # nuke + create tc/
-    # touch tc/__init__.py
+    # touch taskcluster/generated/__init__.py
     json_file = os.environ.get(
         "APIS_JSON",
         os.path.join(os.path.dirname(__file__), "taskcluster", "apis.json")
@@ -92,7 +91,7 @@ if __name__ == '__main__':
         env.filters['docstring'] = docstringify
         env.filters['angles_to_braces'] = angles_to_braces
         code = render(env, 'baseUrl.template', api, name, url)
-        with open(os.path.join(os.getcwd(), 'tc', '{}.py'.format(name)),
+        with open(os.path.join(os.getcwd(), 'taskcluster', 'generated', '{}.py'.format(name)),
                   'w') as fh:
             code = to_unicode(code)
             print(code, file=fh)

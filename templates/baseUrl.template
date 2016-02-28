@@ -14,12 +14,11 @@ class {{service_name}}:
     {{api['title']}}
     {{api['description'] | docstring}}
     '''
-
-    {% if 'baseUrl' in api %}
+{% if 'baseUrl' in api %}
     baseUrl = '{{api['baseUrl'] | string}}'
-    {% else %}
+{% else %}
     baseUrl =
-    {% endif %}
+{% endif %}
     version = {{api['version']}}
     referenceUrl = '{{reference_url}}'
 
@@ -36,7 +35,7 @@ class {{service_name}}:
         {{entry['description'] | docstring(8)}}
         '''
         method = '{{entry['method']}}'
-        {#- TODO: Check that <vars> are present in entry['args'] #}
+{#- TODO: Check that <vars> are present in entry['args'] #}
         url = '{baseUrl}{{entry['route'] | angles_to_braces}}'.format(
             baseUrl=self.baseUrl,
             {%- for a in entry['args'] %}
