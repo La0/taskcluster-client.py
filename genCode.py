@@ -21,7 +21,8 @@ def argumentstring(entry):
     Returns an argument string for the given function
     '''
     argument_names = ['self']
-    argument_names.extend(entry['args'])
+    if 'args' in entry:
+        argument_names.extend(entry['args'])
     if 'input' in entry:
         input_name = 'payload'
         argument_names.append(input_name)
@@ -32,11 +33,18 @@ def angles_to_braces(s):
     '''
     Returns a string with <vars> replaced by {vars}
     '''
-    return re.sub('<(.*?)>', '{\\1}', s)
+    if s:
+        return re.sub('<(.*?)>', '{\\1}', s)
 
 
-def render(env, template_name, api, service_name, url):
+def render(env, template_name, service_name, defn):
     template = env.get_template(template_name)
+    api = defn['reference']
+    url = defn['referenceUrl']
+    if 'baseUrl' in api:
+        print(name, api['baseUrl'])
+    else:
+        print(name, api['$schema'])
     return template.render(
         service_name=service_name,
         api=api,
@@ -78,19 +86,11 @@ if __name__ == '__main__':
     )
     api_def = load_json(json_file)
     for name, defn in api_def.items():
-        api = defn['reference']
-        url = defn['referenceUrl']
-        if 'baseUrl' in api:
-            print(name, api['baseUrl'])
-        else:
-            print(name, api['$schema'])
-            print("Skipping (no AMQP exchange support yet)...")
-            continue
         env = Environment(loader=FileSystemLoader('templates'))
         env.filters['string'] = stringify
         env.filters['docstring'] = docstringify
         env.filters['angles_to_braces'] = angles_to_braces
-        code = render(env, 'baseUrl.template', api, name, url)
+        code = render(env, 'baseUrl.template', name, defn)
         with open(os.path.join(os.getcwd(), 'taskcluster', 'generated', '{}.py'.format(name)),
                   'w') as fh:
             code = to_unicode(code)

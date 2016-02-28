@@ -2,32 +2,28 @@
 '''
 {{api['title']}}
 '''
-import aiohttp
-import asyncio
 import logging
+import taskcluster.client as client
 
 log = logging.getLogger(__name__)
 
 
-class {{service_name}}:
+class {{service_name}}(client.BaseClient):
     '''
     {{api['title']}}
     {{api['description'] | docstring}}
     '''
-{% if 'baseUrl' in api %}
-    baseUrl = '{{api['baseUrl'] | string}}'
-{% else %}
-    baseUrl =
-{% endif %}
     version = {{api['version']}}
     referenceUrl = '{{reference_url}}'
 
     def __init__(self):
-        self.session = aiohttp.ClientSession()
+        self.classOptions = {}
+{%- for item in ['baseUrl', 'exchangePrefix'] %}{% if item in api %}
+        self.classoptions['{{ item }}'] = '{{api[item] | string}}'
+{% endif %}{%- endfor %}
 {{''}}
 {%- for entry in api['entries'] %}
 {#- check if entry has type == 'function' #}
-    @asyncio.coroutine
     def {{entry['name']}}({{argumentstring(entry)}}):
         '''
         {{entry['title']}}
