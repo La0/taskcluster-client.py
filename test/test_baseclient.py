@@ -52,3 +52,18 @@ class TestBaseClient(unittest.TestCase):
         route = "/asdf/foo/bar"
         url = client.makeFullUrl(route, validOptions=['a', 'b'], options={'a': 1})
         self.assertEqual(url, FAKE_URL + route + "?a=1")
+
+    def test_makeHeaders_hawk(self):
+        """test_base_client | test makeHeaders
+        """
+        options = {
+            'credentials' : {
+                'hawkHeader' : 'Hawk no-secret ext="empty" mac="fake"',
+            }
+        }
+        client = BC(options)
+        route = "/asdf/foo/bar"
+        url = client.makeFullUrl(route)
+        headers = client.makeHeaders('GET', url, {}, None)
+        self.assertIn('Authorization', headers)
+        self.assertEqual(headers['Authorization'], options['credentials']['hawkHeader'])

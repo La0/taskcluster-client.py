@@ -30,6 +30,7 @@ _defaultConfig = config = {
         'clientId': os.environ.get('TASKCLUSTER_CLIENT_ID'),
         'accessToken': os.environ.get('TASKCLUSTER_ACCESS_TOKEN'),
         'certificate': os.environ.get('TASKCLUSTER_CERTIFICATE'),
+        'hawkHeader' : None,
     },
     'maxRetries': 5,
     'signedUrlExpiration': 15 * 60,
@@ -52,7 +53,7 @@ class BaseClient(object):
 
         credentials = o.get('credentials')
         if credentials:
-            for x in ('accessToken', 'clientId', 'certificate'):
+            for x in ('accessToken', 'clientId', 'certificate', 'hawkHeader'):
                 value = credentials.get(x)
                 if value and not isinstance(value, six.binary_type):
                     try:
@@ -256,6 +257,15 @@ class BaseClient(object):
             cred['accessToken']
         )
 
+    def _hasHawkHeader(self):
+        """ Return True, if hawk header is already given """
+        cred = self.options.get('credentials')
+        return (
+            cred and
+            'hawkHeader' in cred and
+            cred['hawkHeader']
+        )
+
     def makeQueryString(self, options, validOptions=None):
         if not options:
             return ''
@@ -296,6 +306,8 @@ class BaseClient(object):
             )
 
             headers = {'Authorization': sender.request_header}
+        elif self._hasHawkHeader():
+            headers = {'Authorization': self.options['credentials']['hawkHeader']}
         else:
             log.debug('Not using hawk!')
             headers = {}
