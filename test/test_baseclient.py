@@ -57,8 +57,8 @@ class TestBaseClient(unittest.TestCase):
         """test_base_client | test makeHeaders
         """
         options = {
-            'credentials' : {
-                'hawkHeader' : 'Hawk no-secret ext="empty" mac="fake"',
+            'credentials': {
+                'hawkHeader': 'Hawk no-secret ext="empty" mac="fake"',
             }
         }
         client = BC(options)

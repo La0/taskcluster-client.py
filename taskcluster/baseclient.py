@@ -30,7 +30,7 @@ _defaultConfig = config = {
         'clientId': os.environ.get('TASKCLUSTER_CLIENT_ID'),
         'accessToken': os.environ.get('TASKCLUSTER_ACCESS_TOKEN'),
         'certificate': os.environ.get('TASKCLUSTER_CERTIFICATE'),
-        'hawkHeader' : None,
+        'hawkHeader': None,
     },
     'maxRetries': 5,
     'signedUrlExpiration': 15 * 60,
