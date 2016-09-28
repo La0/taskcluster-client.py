@@ -260,11 +260,7 @@ class BaseClient(object):
     def _hasHawkHeader(self):
         """ Return True, if hawk header is already given """
         cred = self.options.get('credentials')
-        return (
-            cred and
-            'hawkHeader' in cred and
-            cred['hawkHeader']
-        )
+        return cred and cred.get('hawkHeader', False)
 
     def makeQueryString(self, options, validOptions=None):
         if not options:
